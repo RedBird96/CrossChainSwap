@@ -1,5 +1,5 @@
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useTransfers } from "../hooks/useTransfers";
 import { useTransferStore } from "../hooks/useTransferStore";
 import { fetchBridgeFee } from "../lib/axelar";
@@ -15,10 +15,10 @@ const Spinner = () => (
     <div className="flex justify-center py-8">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
     </div>
-  );
+);
 
-export default function BridgeInterface() {
-
+// Wrap the main content in a client component
+const BridgeContent = () => {
     const [fee, setFee] = useState<string | AxelarQueryAPIFeeResponse>();
     const { fetchTransfers } = useTransfers();
     const searchParams = useSearchParams();
@@ -26,13 +26,13 @@ export default function BridgeInterface() {
 
     // Auto-refresh every 30 seconds
     useEffect(() => {
-    const interval = setInterval(() => {
-        if (searchParams) {
-        fetchTransfers(searchParams);
-        }
-    }, 10000);
+        const interval = setInterval(() => {
+            if (searchParams) {
+                fetchTransfers(searchParams);
+            }
+        }, 10000);
 
-    return () => clearInterval(interval);
+        return () => clearInterval(interval);
     }, [params, fetchTransfers]);
 
     useEffect(() => {
@@ -68,11 +68,19 @@ export default function BridgeInterface() {
         <>
             {!transfers || transfers.length == 0 ? <Spinner /> :
                 <TransactionList 
-                    data = {data}
-                    fee = {fee}
-                    total = {total}
+                    data={data}
+                    fee={fee}
+                    total={total}
                 />
             }
         </>
-    )
+    );
+};
+
+export default function BridgeInterface() {
+    return (
+        <Suspense fallback={<Spinner />}>
+            <BridgeContent />
+        </Suspense>
+    );
 }
