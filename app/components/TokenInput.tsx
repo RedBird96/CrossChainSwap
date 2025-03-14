@@ -6,14 +6,14 @@ interface TokenInputProps {
   token: string;
   balance?: string;
 }
-  
+
 export const TokenInput: React.FC<TokenInputProps> = ({ value, onValueChange, token, balance }) => (
   <div className="bg-gray-50 rounded-xl p-4">
     <div className="flex justify-between items-center mb-2">
-      <span className="text-gray-600">You {token === 'ETH' ? 'pay' : 'receive'}</span>
+      <span className="text-gray-600">{token === 'ETH' ? 'Sell' : 'Buy'}</span>
       {balance && <span className="text-sm text-gray-500">Balance: {balance}</span>}
     </div>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2">
       <input
         type="number"
         className="bg-transparent text-2xl w-full outline-none"

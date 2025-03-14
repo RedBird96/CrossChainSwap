@@ -43,30 +43,34 @@ const BridgeContent = () => {
         loadAxelarData();
     }, []);
 
-    const data = transfers.map(t => ({
-        type: t.type,
-        amount: t.send?.amount,
-        destination_chain: t.send?.destination_chain,
-        source_chain: t.send?.source_chain,
-        txhash: t.send?.txhash,
-        created_at: t.send?.created_at,
-        status: t.send?.status,
-        sender_address: t.send?.sender_address,
-        recipient_address: t.send?.recipient_address
-    })).filter((e): e is ExtractedTransfer => 
-        !!e.amount &&
-        !!e.destination_chain &&
-        !!e.source_chain &&
-        !!e.txhash &&
-        !!e.created_at &&
-        !!e.status &&
-        !!e.sender_address &&
-        !!e.recipient_address
-    );
+    let data:ExtractedTransfer[] = [];
+
+    try {
+        data = transfers.map(t => ({
+            type: t.type,
+            amount: t.send?.amount,
+            destination_chain: t.send?.destination_chain,
+            source_chain: t.send?.source_chain,
+            txhash: t.send?.txhash,
+            created_at: t.send?.created_at,
+            status: t.send?.status,
+            sender_address: t.send?.sender_address,
+            recipient_address: t.send?.recipient_address
+        })).filter((e): e is ExtractedTransfer => 
+            !!e.amount &&
+            !!e.destination_chain &&
+            !!e.source_chain &&
+            !!e.txhash &&
+            !!e.created_at &&
+            !!e.status &&
+            !!e.sender_address &&
+            !!e.recipient_address
+        );
+    } catch(err) {}
     
     return (
         <>
-            {!transfers || transfers.length == 0 ? <Spinner /> :
+            {!data || data.length == 0 ? <Spinner /> :
                 <TransactionList 
                     data={data}
                     fee={fee}

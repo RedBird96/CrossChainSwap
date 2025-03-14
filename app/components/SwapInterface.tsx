@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { USDC_ADDRESS, WETH_ADDRESS } from '../utils/constants';
 import { usePoolInfo } from '../hooks/usePool';
 import { ChainId } from '../utils/types';
@@ -10,19 +10,38 @@ import { PoolInfo } from './PoolInfo';
 export function SwapDialog() {
   const [inputAmount, setInputAmount] = useState('');
   const [outputAmount, setOutputAmount] = useState('');
+  const [activeField, setActiveField] = useState("input"); // Track active input
   const { loading, error, data } = usePoolInfo({
     token0: USDC_ADDRESS, 
     token1: WETH_ADDRESS, 
     chainId: ChainId.Mainnet
   });
   
-  // Simulate swap rate calculation
+  // Handle input changes
+  const handleInputChange = (value: string) => {
+    setActiveField("input");
+    setInputAmount(value);
+  };
+
+  const handleOutputChange = (value: string) => {
+    setActiveField("output");
+    setOutputAmount(value);
+  };
+
+  // Unified swap calculation effect
   useEffect(() => {
-    if (data?.pool && inputAmount) {
+    if (!data?.pool) return;
+
+    if (activeField === "input") {
       const rate = parseFloat(data.pool.token0Price);
-      setOutputAmount((parseFloat(inputAmount) * rate).toFixed(4));
+      const outputValue = parseFloat(inputAmount) * rate;
+      setOutputAmount(!inputAmount ? "0" : outputValue.toFixed(4));
+    } else if (activeField === "output") {
+      const rate = parseFloat(data.pool.token1Price);
+      const inputValue = parseFloat(outputAmount) * rate;
+      setInputAmount(!outputAmount ? "0" : inputValue.toFixed(4));
     }
-  }, [inputAmount, data]);
+  }, [inputAmount, outputAmount, data, activeField]);
 
   if (loading) return <div className="text-center py-8">Loading pool data...</div>;
   if (error) return <div className="text-red-500 text-center">Error loading data</div>;
@@ -40,9 +59,9 @@ export function SwapDialog() {
 
       <TokenInput
         value={inputAmount}
-        onValueChange={setInputAmount}
+        onValueChange={handleInputChange}//{setInputAmount}
         token="ETH"
-        balance="0.5234"
+        balance="0.0"
       />
       
       <div className="my-4 flex justify-center">
@@ -53,7 +72,7 @@ export function SwapDialog() {
 
       <TokenInput
         value={outputAmount}
-        onValueChange={setOutputAmount}
+        onValueChange={handleOutputChange}
         token="USDC"
       />
 
