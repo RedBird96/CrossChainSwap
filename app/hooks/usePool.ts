@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { PoolInfoParams, PoolInfoResult, PoolQueryResponse } from "../utils/types";
+import { ChainId, PoolInfoParams, PoolInfoResult, PoolQueryResponse } from "../utils/types";
 import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
 import { ETH_USDC_POOL_QUERY } from "../lib/graphql/uniswapQueries";
-import { UNISWAP_V3_SUBGRAPH_MAINNET } from "../utils/constants";
+import { UNISWAP_V3_SUBGRAPH_MAINNET, UNISWAP_V3_SUBGRAPH_POLYGON } from "../utils/constants";
 
 export function usePoolInfo({
     token0,
@@ -15,7 +15,7 @@ export function usePoolInfo({
 
     // Dynamic client selection based on chainId
     const client = useMemo(() => new ApolloClient({
-        uri: UNISWAP_V3_SUBGRAPH_MAINNET,
+        uri: chainId === ChainId.Mainnet ? UNISWAP_V3_SUBGRAPH_MAINNET : UNISWAP_V3_SUBGRAPH_POLYGON,
         cache: new InMemoryCache(),
     }), [chainId]);
 

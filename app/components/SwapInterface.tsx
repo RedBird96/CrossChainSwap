@@ -1,9 +1,8 @@
 import { SetStateAction, useEffect, useState } from 'react';
-import { USDC_ADDRESS, WETH_ADDRESS } from '../utils/constants';
+import { NETWORKS, TOKENS } from '../utils/constants';
 import { usePoolInfo } from '../hooks/usePool';
 import { ChainId } from '../utils/types';
 import { TokenInput } from './TokenInput';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { PoolInfo } from './PoolInfo';
 
@@ -11,12 +10,13 @@ export function SwapDialog() {
   const [inputAmount, setInputAmount] = useState('');
   const [outputAmount, setOutputAmount] = useState('');
   const [activeField, setActiveField] = useState("input"); // Track active input
+  const [selectedNetwork, setSelectedNetwork] = useState(NETWORKS[0].label); // Network state
+  const [chainId, setChainId] = useState<ChainId>(ChainId.Mainnet);
   const { loading, error, data } = usePoolInfo({
-    token0: USDC_ADDRESS, 
-    token1: WETH_ADDRESS, 
-    chainId: ChainId.Mainnet
+    token0: TOKENS[chainId as keyof typeof TOKENS].USDC_ADDRESS, 
+    token1: TOKENS[chainId as keyof typeof TOKENS].WETH_ADDRESS, 
+    chainId: chainId
   });
-  
   // Handle input changes
   const handleInputChange = (value: string) => {
     setActiveField("input");
@@ -27,7 +27,6 @@ export function SwapDialog() {
     setActiveField("output");
     setOutputAmount(value);
   };
-
   // Unified swap calculation effect
   useEffect(() => {
     if (!data?.pool) return;
@@ -43,6 +42,14 @@ export function SwapDialog() {
     }
   }, [inputAmount, outputAmount, data, activeField]);
 
+  useEffect(() => {
+    if (selectedNetwork == NETWORKS[0].value) {
+      setChainId(ChainId.Mainnet);
+    } else {
+      setChainId(ChainId.Polygon);
+    }
+  }, [selectedNetwork]);
+
   if (loading) return <div className="text-center py-8">Loading pool data...</div>;
   if (error) return <div className="text-red-500 text-center">Error loading data</div>;
 
@@ -50,9 +57,17 @@ export function SwapDialog() {
     <div className="max-w-md mx-auto bg-white rounded-2xl p-6 shadow-xl">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Swap</h2>
-        <button className="p-2 hover:bg-gray-100 rounded-lg">
-          <Cog6ToothIcon className="w-6 h-6 text-gray-600" />
-        </button>
+        <select
+          value={selectedNetwork}
+          onChange={(e) => setSelectedNetwork(e.target.value)}
+          className="bg-gray-800 text-white px-3 py-1 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+        >
+          {NETWORKS.map((network) => (
+            <option key={network.value} value={network.value}>
+              {network.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {data?.pool && <PoolInfo poolData={data} />}

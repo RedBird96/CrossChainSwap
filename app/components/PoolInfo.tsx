@@ -14,9 +14,5 @@ export const PoolInfo: React.FC<{ poolData: any }> = ({ poolData }) => (
         <div className="text-sm text-gray-500">24h Tx Count</div>
         <div className="text-lg font-medium">{poolData.dailyTxCount}</div>
       </div>
-      {/* <div className="bg-gray-50 p-4 rounded-xl">
-        <div className="text-sm text-gray-500">Price</div>
-        <div className="text-lg font-medium">1 ETH = {poolData.token0Price} USDC</div>
-      </div> */}
     </div>
 );
